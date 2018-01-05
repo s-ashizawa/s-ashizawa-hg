@@ -1,1 +1,89 @@
-HOGEHOGE
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>GoogleAPIで遊ぶ</title>
+<style>
+#mapArea {
+	width: 700px;
+	height: 400px;
+}
+
+</style>
+</head>
+<body>
+<div id="mapArea"></div>
+<form>
+    <p>
+    <input type="button" value="HG" onclick="setHG()">
+    <input type="button" value="MVS" onclick="setMVS()">
+    <label>緯度</label>
+    <input type="text" id="ido">
+    <label>経度</label>
+    <input type="text" id="keido">
+    <input type="button" value="座標ジャンプ" onclick="setOther()">
+    <input type="button" value="画像化" onclick="getPict()">
+    </p>
+</form>
+<img id="imgArea" src=""  alt="">
+
+<script>
+var map;
+var hg;
+var mvs;
+var pictArea;
+var src1;
+var src2;
+var centerVal;
+function initMap() {
+
+	map = new google.maps.Map(document.getElementById('mapArea'), { // #mapAreaに地図を埋め込む
+		center: { // 地図の中心を指定
+			lat: 35.469655, // 緯度
+			lng: 139.628545 // 経度
+		},
+		zoom: 19 // 地図のズームを指定
+	});
+	getCenter();
+	
+	var listener = map.addListener( "center_changed", function() {getCenter();}) ; // 地図動作時のイベントリスナ
+	
+	hg = new google.maps.LatLng(35.469655,139.628545);
+	mvs = new google.maps.LatLng(35.222730,139.673317);
+	
+	src1 = "https://maps.googleapis.com/maps/api/staticmap?";
+	src2 = "&size=700x400&key=AIzaSyAMtYlR0PitkKvB7-qyEr199Bxu0wyAqug";
+}
+
+function setHG() {
+  map.setCenter(hg);
+}
+
+function setMVS() {
+  map.setCenter(mvs);
+}
+
+function setOther() {
+  var ido = document.getElementById("ido").value;
+  var keido = document.getElementById("keido").value;
+  var other = new google.maps.LatLng(ido,keido);
+  map.setCenter(other);
+}
+
+function getCenter() {
+	var center = map.getCenter();
+	document.getElementById("ido").value = center.lat();
+	document.getElementById("keido").value = center.lng();
+}
+
+function getPict() {
+	//alert(src1 + centerVal + src2);
+	var center = map.getCenter();
+	centerVal = "center=" + center.lat() + "%2C" + center.lng() + "&zoom=" + map.getZoom();
+	document.getElementById("imgArea").src= src1 + centerVal + src2;
+}
+
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC5Zjm1apoZOrdjGQV6GUK5Q5P8cNDzxWM&callback=initMap"></script>
+</body>
+</html>
