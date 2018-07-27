@@ -5,7 +5,7 @@
 <title>GoogleAPIで遊ぶ</title>
 <style>
 #mapArea {
-	width: 700px;
+	width: 800px;
 	height: 400px;
 }
 
@@ -15,18 +15,35 @@
 <div id="mapArea"></div>
 <form>
     <p>
-    <input type="button" value="HG" onclick="setHG()">
-    <input type="button" value="MVS" onclick="setMVS()">
-    <label>緯度</label>
-    <input type="text" id="ido">
-    <label>経度</label>
-    <input type="text" id="keido">
-    <input type="button" value="座標ジャンプ" onclick="setOther()">
-    <input type="button" value="画像化" onclick="getPict()">
+    <div>
+	    <label>緯度</label>
+	    <input type="text" id="ido">
+	    <label>経度</label>
+	    <input type="text" id="keido">
+		<label>コマ数</label>
+		<select id="koma">
+		<option value="2">2*2</option>
+		<option value="4" selected>4*4</option>
+		<option value="8">8*8</option>
+		<option value="16">16*16</option>
+		</select>
+	</div>
+	<div>
+		<input type="button" value="HG" onclick="setHG()">
+	    <input type="button" value="MVS" onclick="setMVS()">
+	    <input type="button" value="座標ジャンプ" onclick="setOther()">
+	    <input type="button" value="画像化" onclick="getPict()">
+	</div>
     </p>
 </form>
-<img id="imgArea" src=""  alt="">
-
+<div><label>画像にしたらここにでる↓</label></div>
+<div id="imgDiv">
+	<img id="imgArea" src=""  alt="">
+</div>
+<div><label>分割した画像がここにでる↓</label></div>
+<div id="puzzleDiv">
+	<canvas id='puzzle'></canvas>
+</div>
 <script>
 var map;
 var hg;
@@ -35,6 +52,11 @@ var pictArea;
 var src1;
 var src2;
 var centerVal;
+var width = 160;
+var height = 100;
+var canvas = document.getElementById("puzzle");
+var ctx = canvas.getContext("2d");
+
 function initMap() {
 
 	map = new google.maps.Map(document.getElementById('mapArea'), { // #mapAreaに地図を埋め込む
@@ -76,14 +98,60 @@ function getCenter() {
 	document.getElementById("keido").value = center.lng();
 }
 
+
+var img = new Image();
 function getPict() {
 	//alert(src1 + centerVal + src2);
 	var center = map.getCenter();
 	centerVal = "center=" + center.lat() + "%2C" + center.lng() + "&zoom=" + map.getZoom();
 	document.getElementById("imgArea").src= src1 + centerVal + src2;
+	img.src =  src1 + centerVal + src2;
+}
+
+
+img.onload = function() {
+	canvas.width = 640;
+	canvas.height = 400;
+	width = canvas.width / document.getElementById("koma").value;
+	height = canvas.height / document.getElementById("koma").value;
+		
+	var len = img.width / width;
+	var ary = [];
+	var cnt = 0;
+
+	for(var i = 0;i < len;i++){
+	  for(var j = 0;j < len;j++){
+	    ary[cnt++] = [i,j];
+	  }
+	}
+	
+	ary.shuffle();
+	//console.log(ary);
+	
+	for(var i = 0;i < len;i++){
+	  for(var j = 0;j < len;j++){
+	    cnt--;
+	    var x = ary[cnt][0],y = ary[cnt][1];
+	    ctx.drawImage(img, width * x, height * y, width, height, width * i, height * j, width, height);
+	  }
+	}
+}
+
+
+Array.prototype.shuffle = function() {
+	var i = this.length;
+	while(i){
+	  var j = Math.floor(Math.random()*i);
+	  var t = this[--i];
+	  this[i] = this[j];
+	  this[j] = t;
+	}
+	
+	return this;
 }
 
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC5Zjm1apoZOrdjGQV6GUK5Q5P8cNDzxWM&callback=initMap"></script>
+<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
 </body>
 </html>
